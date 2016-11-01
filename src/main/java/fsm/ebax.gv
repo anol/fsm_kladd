@@ -1,0 +1,40 @@
+digraph ebax
+{ 
+	graph[fontname="Arial" splines=true overlap=false ranksep=2 nodesep=2] 
+	node[fontname="Arial" shape=box height=1 width=2 style="rounded, bold, filled"] 
+	edge[fontname="Arial" style="bold"] 
+	subgraph cluster0 
+	{
+		label = "ebax";	
+	start [ label="start\n" ];
+	stop [ label="stop\n" ];
+	ebax_abort [ label="ebax_abort\n\nentry / onEnter" ];
+	ebax_account [ label="ebax_account\n\nentry / onEnter" ];
+	ebax_bankid [ label="ebax_bankid\n\nentry / onEnter" ];
+	ebax_old_user [ label="ebax_old_user\n\nentry / onEnter" ];
+	ebax_payment_complete [ label="ebax_payment_complete\n\nentry / onEnter" ];
+	ebax_pincode [ label="ebax_pincode\n\nentry / onEnter" ];
+	ebax_pincode_timeout [ label="ebax_pincode_timeout\n\nentry / onEnter" ];
+	ebax_progress [ label="ebax_progress\n\nentry / onEnter" ];
+	ebax_register [ label="ebax_register\n\nentry / onEnter" ];
+	ebax_registration_completed [ label="ebax_registration_completed\n\nentry / onEnter" ];
+	ebax_wait [ label="ebax_wait\n\nentry / onEnter" ];
+	bankid_personal_number [ label="bankid_personal_number\n\nentry / onEnter" ];
+	bankid_one_time_code [ label="bankid_one_time_code\n\nentry / onEnter" ];
+	bankid_personal_password [ label="bankid_personal_password\n\nentry / onEnter" ];
+	bankid_wait [ label="bankid_wait\n\nentry / onEnter" ];
+	
+	start -> ebax_register[label="immediate"];
+		ebax_account -> ebax_payment_complete[label="short_time"];
+		ebax_bankid -> bankid_wait[label="button"];
+		ebax_payment_complete -> stop[label="short_time"];
+		ebax_pincode -> ebax_bankid[label="button"];
+		ebax_register -> ebax_pincode[label="button"];
+		bankid_personal_number -> bankid_one_time_code[label="button"];
+		bankid_one_time_code -> bankid_personal_password[label="button"];
+		bankid_personal_password -> ebax_account[label="button"];
+		bankid_wait -> bankid_personal_number[label="short_time"];
+		
+	}
+}
+		

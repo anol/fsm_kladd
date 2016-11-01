@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="xfsm.xsl"?>
+<xfsm name="ebax" date="20161031" sign="Testify-Aeo">
+    <events prefix="on_">
+        <event name="button"/>
+        <event name="short_time"/>
+        <event name="SafetyAllow"/>
+        <event name="SafetyInhibit"/>
+        <event name="ExtendTimerExpired"/>
+        <event name="RetractTimerExpired"/>
+        <event name="MaxExtendedTimerExpired"/>
+    </events>
+    <events default_action="reject" prefix="on_">
+        <event name="RequestHome"/>
+        <event name="RequestCompaction"/>
+    </events>
+    <actions prefix="do_">
+        <action name="Stop"/>
+        <action name="Extend"/>
+        <action name="Retract"/>
+        <action name="Confirm"/>
+        <action name="Reject"/>
+        <action name="StartExtendTimer"/>
+        <action name="StartRetractTimer"/>
+        <action name="StartMaxExtendedTimer"/>
+    </actions>
+    <states prefix="in_">
+        <state name="start"/>
+        <state name="stop"/>
+    </states>
+    <states prefix="in_">
+        <state name="ebax_abort" image="ebax_abort.png" on_enter="onEnter"/>
+        <state name="ebax_account" image="ebax_account.png" on_enter="onEnter"/>
+        <state name="ebax_bankid" image="ebax_choose_bankid.png" on_enter="onEnter"/>
+        <state name="ebax_old_user" image="ebax_old_user.png" on_enter="onEnter"/>
+        <state name="ebax_payment_complete" image="ebax_payment_complete.png" on_enter="onEnter"/>
+        <state name="ebax_pincode" image="ebax_pincode.png" on_enter="onEnter"/>
+        <state name="ebax_pincode_timeout" image="ebax_pincode_timeout.png" on_enter="onEnter"/>
+        <state name="ebax_progress" image="ebax_progress.png" on_enter="onEnter"/>
+        <state name="ebax_register" image="ebax_register_new_user.png" on_enter="onEnter"/>
+        <state name="ebax_registration_completed" image="ebax_registration_completed.png" on_enter="onEnter"/>
+        <state name="ebax_wait" image="ebax_wait.png" on_enter="onEnter"/>
+    </states>
+    <states prefix="in_">
+        <state name="bankid_personal_number" image="bankid_number.png" on_enter="onEnter"/>
+        <state name="bankid_one_time_code" image="bankid_code.png" on_enter="onEnter"/>
+        <state name="bankid_personal_password" image="bankid_password.png" on_enter="onEnter"/>
+        <state name="bankid_wait" image="bankid_wait.png" on_enter="onEnter"/>
+    </states>
+    <use_cases prefix="CDC_">
+        <use_case name="NewCustomer">
+            <case in="start" on="immediate" to="ebax_register"/>
+            <case in="ebax_register" on="button" to="ebax_pincode"/>
+            <case in="ebax_pincode" on="button" to="ebax_bankid"/>
+            <case in="ebax_bankid" on="button" to="bankid_wait"/>
+            <case in="bankid_wait" on="short_time" to="bankid_personal_number"/>
+            <case in="bankid_personal_number" on="button" to="bankid_one_time_code"/>
+            <case in="bankid_one_time_code" on="button" to="bankid_personal_password"/>
+            <case in="bankid_personal_password" on="button" to="ebax_account"/>
+            <case in="ebax_account" on="short_time" to="ebax_payment_complete"/>
+            <case in="ebax_payment_complete" on="short_time" to="stop"/>
+        </use_case>
+        <use_case name="KnownCustomer">
+            <case in="Inhibit" on="SafetyAllow" to="Ready"/>
+        </use_case>
+        <use_case name="AnonymousCustomer">
+            <case in="Ready" on="SafetyInhibit" to="Inhibit"/>
+            <case in="Ready" on="RequestHome" do="Retract" to="Retracting"/>
+            <case in="Ready" on="RequestCompaction" do="Extend" to="Extending"/>
+        </use_case>
+        <use_case name="OptionalAuthentication">
+            <case in="Retracting" on="SafetyInhibit" to="Inhibit"/>
+            <case in="Retracting" on="RetractTimerExpired" do="Stop" to="Ready"/>
+        </use_case>
+        <use_case name="ForcedAuthentication">
+            <case in="Extending" on="SafetyInhibit" to="Inhibit"/>
+            <case in="Extending" on="ExtendTimerExpired" do="Stop" to="MaxExtended"/>
+            <case in="MaxExtended" on="MaxExtendedTimerExpired" do="Retract" to="Retracting"/>
+        </use_case>
+    </use_cases>
+</xfsm>
